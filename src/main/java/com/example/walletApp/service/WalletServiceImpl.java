@@ -17,7 +17,11 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     public Wallet createWallet(Wallet wallet) {
-        if(wallet.getBalance() == null) wallet.setBalance(0.0);
+        if (repository.existsByMobile(wallet.getMobile())) {
+            throw new RuntimeException("Mobile number " + wallet.getMobile() + " is already registered.");
+        }
+        
+        if (wallet.getBalance() == null) wallet.setBalance(0.0);
         return repository.save(wallet);
     }
 

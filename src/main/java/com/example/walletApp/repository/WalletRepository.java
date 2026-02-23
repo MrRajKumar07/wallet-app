@@ -10,4 +10,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface WalletRepository extends JpaRepository<Wallet, Long> {
 	Optional<Wallet> findByMobile(String mobile);
+	boolean existsByMobile(String mobile);
 }
