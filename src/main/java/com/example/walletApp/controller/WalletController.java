@@ -56,9 +56,15 @@ public class WalletController {
 
     @Operation(summary = "Transfer funds", description = "Transfer money from one mobile number to another. Updates both balances.")
     @PostMapping("/transfer")
-    public String transfer(@Valid @RequestBody TransferRequest request) {
-        walletService.transferMoney(request);
-        return "Transfer successful!";
+    public ResponseEntity<String> transfer(@Valid @RequestBody TransferRequest req) {
+        try {
+            walletService.transferMoney(req);
+            return ResponseEntity.ok("Transfer successful!");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
     
     @Operation(summary = "Delete a wallet", description = "Permanently removes a wallet record from the system using its ID")

@@ -47,19 +47,24 @@ public class WalletServiceImpl implements WalletService {
         return repository.save(wallet);
     }
 
-    @Override
     @Transactional
     public void transferMoney(TransferRequest req) {
+        if (req.getFromMobile().equals(req.getToMobile())) {
+            throw new IllegalArgumentException("Sender and Receiver mobile numbers must be different.");
+        }
+
         Wallet from = repository.findByMobile(req.getFromMobile())
-                .orElseThrow(() -> new RuntimeException("Sender not found with mobile: " + req.getFromMobile()));
+                .orElseThrow(() -> new RuntimeException("Sender wallet not found"));
         Wallet to = repository.findByMobile(req.getToMobile())
-                .orElseThrow(() -> new RuntimeException("Receiver not found with mobile: " + req.getToMobile()));
+                .orElseThrow(() -> new RuntimeException("Receiver wallet not found"));
+
         if (from.getBalance() < req.getAmount()) {
-            throw new RuntimeException("Insufficient funds in sender's wallet");
+            throw new RuntimeException("Insufficient funds in sender wallet.");
         }
 
         from.setBalance(from.getBalance() - req.getAmount());
         to.setBalance(to.getBalance() + req.getAmount());
+
         repository.save(from);
         repository.save(to);
     }
