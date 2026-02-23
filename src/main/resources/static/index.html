@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet App</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #64748b;
+            --bg: #f8fafc;
+            --border: #e2e8f0;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            margin: 20px;
+            color: #1e293b;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 4px;
+            border: none;
+            transition: 0.3s;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: #1d4ed8; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th { background: #f1f5f9; }
+
+        .form-section {
+            display: none;
+            border: 1px solid var(--border);
+            padding: 20px;
+            border-radius: 8px;
+            background: #ffffff;
+            margin-top: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        input {
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+        }
+
+        input[readonly] {
+            background-color: #f1f5f9;
+            cursor: not-allowed;
+        }
+
+        .actions-cell button {
+            margin-right: 5px;
+            font-size: 0.75rem;
+            background: #f1f5f9;
+            border: 1px solid var(--border);
+            margin-bottom: 2px;
+        }
+
+        .actions-cell button:hover { background: var(--border); }
+        .btn-delete { color: var(--danger); border: 1px solid #fecaca !important; }
+        .btn-delete:hover { background: #fef2f2 !important; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h2>Wallet App</h2>
+        <button class="btn-primary" onclick="openCreateForm()">Create Wallet</button>
+    </header>
+
+    <h3>List Wallets</h3>
+    <table id="walletTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>USERNAME</th>
+                <th>MOBILE</th>
+                <th>BALANCE</th>
+                <th>ACTIONS</th>
+            </tr>
+        </thead>
+        <tbody id="walletBody"></tbody>
+    </table>
+
+    <div id="createForm" class="form-section">
+        <h3>Create New Wallet</h3>
+        <div class="form-grid">
+            <div class="input-group">
+                <label>Username</label>
+                <input type="text" id="cwUsername" placeholder="Enter name">
+            </div>
+            <div class="input-group">
+                <label>Mobile (10 digits)</label>
+                <input type="text" id="cwMobile" placeholder="e.g. 9876543210">
+            </div>
+            <div class="input-group">
+                <label>Initial Balance</label>
+                <input type="number" id="cwBalance" placeholder="0.00">
+            </div>
+        </div>
+        <div style="margin-top: 15px;">
+            <button onclick="executeCreate()" class="btn-primary">Create Wallet</button>
+            <button onclick="closeForms()" style="background:#cbd5e1">Cancel</button>
+        </div>
+    </div>
+
+    <div id="transactionForm" class="form-section">
+        <h3 id="formTitle">Transaction Form</h3>
+        <div class="form-grid">
+            <div class="input-group">
+                <label>ID</label>
+                <input type="text" id="txId" readonly>
+            </div>
+            <div class="input-group">
+                <label>Username</label>
+                <input type="text" id="txUsername" readonly>
+            </div>
+            <div class="input-group">
+                <label>Mobile</label>
+                <input type="text" id="txMobile" readonly>
+            </div>
+            <div class="input-group">
+                <label>Amount</label>
+                <input type="number" id="txAmount" placeholder="Enter amount">
+            </div>
+        </div>
+        <div style="margin-top: 15px;">
+            <button id="submitTx" class="btn-primary">Submit</button>
+            <button onclick="closeForms()" style="background:#cbd5e1">Cancel</button>
+        </div>
+    </div>
+
+    <div id="transferForm" class="form-section">
+        <h3>Transfer Amount</h3>
+        <div class="form-grid">
+            <div class="input-group">
+                <label>From (Mobile)</label>
+                <input type="text" id="tfFrom" placeholder="Sender mobile">
+            </div>
+            <div class="input-group">
+                <label>To (Mobile)</label>
+                <input type="text" id="tfTo" placeholder="Receiver mobile">
+            </div>
+            <div class="input-group">
+                <label>Amount</label>
+                <input type="number" id="tfAmount" placeholder="Enter amount">
+            </div>
+        </div>
+        <div style="margin-top: 15px;">
+            <button onclick="executeTransfer()" class="btn-primary">Transfer Amount</button>
+            <button onclick="closeForms()" style="background:#cbd5e1">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_BASE = "http://localhost:6760/api/wallets";
+
+    document.addEventListener('DOMContentLoaded', fetchWallets);
+
+    async function fetchWallets() {
+        try {
+            const response = await fetch(`${API_BASE}/all`);
+            const wallets = await response.json();
+            const body = document.getElementById('walletBody');
+            body.innerHTML = '';
+
+            wallets.forEach(w => {
+                body.innerHTML += `
+                    <tr>
+                        <td>#WLT-${w.id}</td>
+                        <td>${w.username}</td>
+                        <td>${w.mobile}</td>
+                        <td>${w.balance.toFixed(2)}</td>
+                        <td class="actions-cell">
+                            <button onclick='openTxForm(${JSON.stringify(w)}, "load")'>Load</button>
+                            <button onclick='openTxForm(${JSON.stringify(w)}, "withdraw")'>Withdraw</button>
+                            <button onclick='openTransferForm("${w.mobile}")'>Transfer</button>
+                            <button onclick='executeDelete(${w.id})' class="btn-delete">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } catch (error) {
+            console.error("Error fetching wallets:", error);
+        }
+    }
+
+    function openCreateForm() {
+        closeForms();
+        document.getElementById('createForm').style.display = 'block';
+    }
+
+    function openTxForm(wallet, type) {
+        closeForms();
+        const form = document.getElementById('transactionForm');
+        form.style.display = 'block';
+        document.getElementById('formTitle').innerText = type === 'load' ? 'Load Amount' : 'Withdraw Amount';
+        document.getElementById('txId').value = wallet.id;
+        document.getElementById('txUsername').value = wallet.username;
+        document.getElementById('txMobile').value = wallet.mobile;
+        document.getElementById('submitTx').onclick = () => executeTransaction(type);
+    }
+
+    function openTransferForm(senderMobile) {
+        closeForms();
+        document.getElementById('transferForm').style.display = 'block';
+        document.getElementById('tfFrom').value = senderMobile;
+    }
+
+    function closeForms() {
+        document.getElementById('transactionForm').style.display = 'none';
+        document.getElementById('transferForm').style.display = 'none';
+        document.getElementById('createForm').style.display = 'none';
+        document.querySelectorAll('input:not([readonly])').forEach(i => i.value = '');
+    }
+
+    // --- VALIDATED API CALLS ---
+
+    async function executeCreate() {
+        const username = document.getElementById('cwUsername').value.trim();
+        const mobile = document.getElementById('cwMobile').value.trim();
+        const balance = document.getElementById('cwBalance').value;
+
+        if (!username || mobile.length !== 10 || isNaN(mobile)) {
+            alert("Validation Error: Please enter a valid name and 10-digit mobile number.");
+            return;
+        }
+
+        const payload = { username, mobile, balance: balance || 0 };
+        const response = await fetch(`${API_BASE}/create`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        handleResponse(response);
+    }
+
+    async function executeTransaction(type) {
+        const id = document.getElementById('txId').value;
+        const amount = document.getElementById('txAmount').value;
+
+        if (amount <= 0) {
+            alert("Validation Error: Amount must be greater than zero.");
+            return;
+        }
+
+        const endpoint = type === 'load' ? 'load' : 'withdraw';
+        const response = await fetch(`${API_BASE}/${endpoint}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, amount })
+        });
+        handleResponse(response);
+    }
+
+    async function executeTransfer() {
+        const from = document.getElementById('tfFrom').value.trim();
+        const to = document.getElementById('tfTo').value.trim();
+        const amount = document.getElementById('tfAmount').value;
+
+        if (!from || !to || from === to || amount <= 0) {
+            alert("Validation Error: Check sender/receiver mobile and ensure amount is positive.");
+            return;
+        }
+
+        const response = await fetch(`${API_BASE}/transfer`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fromMobile: from, toMobile: to, amount })
+        });
+        handleResponse(response);
+    }
+
+    async function executeDelete(id) {
+        if (confirm("Are you sure you want to delete this wallet?")) {
+            const response = await fetch(`${API_BASE}/${id}`, {
+                method: 'DELETE'
+            });
+            handleResponse(response);
+        }
+    }
+
+    async function handleResponse(response) {
+        if (response.ok) {
+            const text = await response.text();
+            alert(text || "Success!");
+            closeForms();
+            fetchWallets();
+        } else {
+            const err = await response.json();
+            alert("Error: " + (err.error || "Something went wrong"));
+        }
+    }
+</script>
+</body>
+</html>
