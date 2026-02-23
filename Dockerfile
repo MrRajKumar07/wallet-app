@@ -16,5 +16,5 @@ WORKDIR /app
 
 COPY --from=build /app/target/wallet-app-0.0.1-SNAPSHOT.jar app.jar
 ENV JAVA_OPTS="-Xmx300m -Xms300m"
-EXPOSE 8080
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar --server.port=${PORT:-8080}"]
+EXPOSE 6760
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar --server.port=${PORT:-6760}"]
